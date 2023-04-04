@@ -1,1 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic compass clock</title>
+  <style>
+    html{
+      background: #000;
+      color: #8f8c9b;
+      font-size: 18px;
+      overflow:hidden;
+    }
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    span{
+      display: block;
+      float: left;
+    }
+    .on{
+      color: #46b9f6;
+    }
+    .wrapper{
+      width:  200px;
+      height: 200px;
+      position: absolute;
+      left:50%;
+      top:50%;
+      margin-top: -100px;
+      margin-left: -100px;
+    }
+    .wrapper .timebox{
+      position: absolute;
+      width:  200px;
+      height: 200px;
+      top:    0;
+      left:   0;
+      border-radius: 100%;
+      transition: all 0.5s;
+    }
+    .timebox span{
+      transition: all 0.5s;
+      float: left;
+    }
 
+    .wrapper  .timebox span{
+      position: absolute;
+      left:50%;
+      top:50%;
+      width: 40px;
+      height: 18px;
+      margin-top: -9px;
+      margin-left: -20px;
+      text-align: right;
+    }
+    .special{
+      width:     40px;
+      height:    40px;
+      position:  fixed;
+      top:       50%;
+      left:      50%;
+      margin:    -9px 0 0 -19px;
+      font-size: 20px;
+      color: rgb(253, 143, 143);
+      border:1px solid #000000;
+      border-radius:5px;
+      font-family: Times New Roman;
+      background-image: -webkit-linear-gradient(left,rgb(78, 78, 236),#8f96ff 10%,#9aa9f4 20%,#afc4ff 30%, #5cc3ff 40%, #78f8e3 50%,#7c9eed 60%,#a083e9 70%,#b390fa 80%,#aec5f3 90%,rgb(128, 102, 255) 100%);
+      -webkit-text-fill-color: transparent; /* font color */
+      -webkit-background-clip: text;/* crop background */
+      -webkit-background-size: 200% 100%; 
+      -webkit-animation: masked-animation 4s linear infinite;
+    }
+    @keyframes masked-animation {
+      0% {
+        background-position: 0  0;
+      }
+      100% {
+        background-position: -100%  0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<span class="special">2023</span>
+<div id="wrapper">
+  <div class="timebox yuebox" id="yueBox"></div>
+  <div class="timebox riqiBox" id="riqiBox"></div>
+  <div class="timebox hourbox" id="hourbox"></div>
+  <div class="timebox minutebox" id="minutebox"></div>
+  <div class="timebox secondbox" id="secondbox"></div>
+</div>
+ 
+</body>
+<script>
+ 
+  let wrapper = document.getElementById("wrapper");
+  let yueBox = document.getElementById("yueBox");
+  let riqiBox = document.getElementById("riqiBox");
+  let hourbox = document.getElementById("hourbox");
+  let minutebox = document.getElementById("minutebox");
+  let secondbox = document.getElementById("secondbox");
+ 
+  let findSiblings = function( tag ){
+    let parent = tag.parentNode;
+    let childs = parent.children;
+    let sb = [];
+    for(let i=0 ; i <= childs.length-1 ; i++){
+      if(childs[i] !== tag){
+        sb[sb.length] = childs[i];
+      }
+    }
+    return sb ;
+  };
+
+  let removeSiblingClass = function( tag ){
+    let sb = findSiblings( tag );
+    for(let i = 0; i <= sb.length - 1; i++){
+      sb[i].className = "";
+    }
+  };
+ 
+  let initMonth = function(){
+    let month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    for(let i = 0; i < 12; i++){
+      let span = document.createElement("span");
+      span.innerHTML = month[i] + ".";
+      yueBox.appendChild(span);
+    }
+  };
+
+  let initDate = function(){
+    for(let i = 1; i <= 31; i++){
+      let span = document.createElement("span");
+      if(i == 1) span.innerHTML = i + "st";
+      else if(i == 2) span.innerHTML = i + "nd";
+      else if(i == 3) span.innerHTML = i + "rd";
+      else span.innerHTML = i + "th";
+      riqiBox.appendChild(span);
+    }
+  };
+ 
+  let initHour = function(){
+    for(let i = 0; i <= 23; i++){
+      let h = i ;
+      let span = document.createElement("span");
+      if(h < 10){
+                h = "0" + h;
+      }
+      span.innerHTML = h + "&nbsp:";
+      hourbox.appendChild(span);
+    }
+  };
+  let initMinute = function(){
+    for(let i = 0; i <= 59; i++){
+      let f = i;
+      let span = document.createElement("span");
+      if(f < 10){
+        f = "0" + f;
+      }
+      span.innerHTML = f + "&nbsp:";
+      minutebox.appendChild(span);
+    }
+  };
+  let initSecond = function(){
+    for(let i = 0; i <= 59; i++){
+      let miao = i;
+      let span = document.createElement("span");
+      if(miao < 10){
+        miao = "0" + miao;
+      }
+      span.innerHTML = miao + "";
+      secondbox.appendChild(span);
+    }
+  };
+ 
+  // time <-> text 
+  let changeTime = function(tag){
+    tag.className = "on";
+    removeSiblingClass( tag );
+  };
+
+  let initRili = function(){
+    initMonth();
+    initDate(); 
+    initHour();  
+    initMinute();
+    initSecond();
+  };
+ 
+  // show current time
+  // variable：mydate   (time)
+  let  showNow = function( mydate ){
+    let yue = mydate.getMonth() ;
+    let riqi = mydate.getDate();
+    let hour = mydate.getHours()  ;
+    let minute = mydate.getMinutes();
+    let second = mydate.getSeconds();
+    // time <-> text   
+    changeTime( yueBox.children[yue] );
+    changeTime( riqiBox.children[riqi-1] );
+    changeTime( hourbox.children[hour] );
+    changeTime( minutebox.children[minute] );
+    changeTime( secondbox.children[second] );
+  };
+ 
+  // dis：circle radius
+  let textRound = function(tag, num, dis){
+    let span = tag.children;
+    for(let i = 0; i <= span.length - 1; i++){
+      span[i].style.transform = "rotate(" + (360 / span.length) * i + "deg)  translateX(" + dis*1.5 + "px)" ;
+    }
+  };
+  // rotate -> "circle" -> degree
+  let rotateTag = function(tag , deg){
+    tag.style.transform = "rotate(" + deg + "deg)";
+  };
+ 
+  let main = function(){
+    initRili(); // init calendar
+ 
+    setInterval(function(){
+      let mydate = new Date();
+      showNow( mydate ); //show current time
+    },1000);
+ 
+    setTimeout(function(){
+      wrapper.className = "wrapper";
+      textRound(yueBox,    12, 50);
+      textRound(riqiBox,   31, 75);
+      textRound(hourbox,   24, 140);
+      textRound(minutebox, 60, 160);
+      textRound(secondbox, 60, 175);
+      setInterval(function(){
+        let mydate = new Date();
+        rotateTag( yueBox ,    -30 * mydate.getMonth());
+        rotateTag( riqiBox ,   -360 / 31 * (mydate.getDate() - 1) );
+        rotateTag( hourbox ,   -360 / 24 * mydate.getHours() );
+        rotateTag( minutebox , -6 * mydate.getMinutes() );
+        rotateTag( secondbox , -6 * mydate.getSeconds() );
+      },1000)
+    },1000)
+  };
+  main();
+</script>
+</html>
